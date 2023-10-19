@@ -4,6 +4,7 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
+const { ObjectId } = require("mongodb");
 
 // middleware
 app.use(cors());
@@ -31,11 +32,47 @@ async function run() {
     await client.connect();
 
     const carCollection = client.db("automobile").collection("cars");
+    const cartCollection = client.db("automobile").collection("cart");
 
     app.get("/cars", async (req, res) => {
       const cursor = carCollection.find({});
       const cars = await cursor.toArray();
       res.json(cars);
+    });
+
+    app.get("/cars/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const car = await carCollection.findOne(query);
+      res.json(car);
+    });
+
+    app.get("/singleUpdate/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const car = await carCollection.findOne(query);
+      res.json(car);
+    });
+
+    app.put("/cars/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const updatedCar = req.body;
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          name: updatedCar.name,
+          price: updatedCar.price,
+          image: updatedCar.image,
+          shortDescription: updatedCar.shortDescription,
+          type: updatedCar.type,
+          rating: updatedCar.rating,
+          brandName: updatedCar.brandName,
+        },
+      };
+      const result = await carCollection.updateOne(query, updateDoc, options);
+      console.log(result);
+      res.json(result);
     });
 
     app.post("/addCar", async (req, res) => {
@@ -44,6 +81,30 @@ async function run() {
       console.log(result);
       res.json(result);
     });
+
+    app.post("/cart", async (req, res) => {
+      const newCart = req.body;
+      console.log(newCart);
+      const result = await cartCollection.insertOne(newCart);
+      console.log(result);
+      res.json(result);
+    });
+
+    app.get("/cart", async (req, res) => {
+      const cursor = cartCollection.find();
+      const cart = await cursor.toArray();
+      res.send(cart);
+    });
+
+    app.delete("/cart/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await cartCollection.deleteOne(query);
+      console.log(result);
+      res.send(result);
+    });
+
+    
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
