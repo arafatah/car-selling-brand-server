@@ -90,19 +90,20 @@ async function run() {
       res.json(result);
     });
 
-    app.get("/cart", async (req, res) => {
-      const cursor = cartCollection.find();
-      const cart = await cursor.toArray();
-      res.send(cart);
+    app.get('/cart/:email', async(req,res)=>{
+      console.log(req.params.email);
+      const result = await cartCollection.find({email: req.params.email}).toArray();
+      res.send(result);
     });
 
-    app.delete("/cart/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = {_id: new ObjectId(id)}
+    app.delete("/cart/:itemId", async (req, res) => {
+      const itemId = req.params.itemId;
+      const query = { _id: new ObjectId(itemId) };
       const result = await cartCollection.deleteOne(query);
       console.log(result);
       res.send(result);
     });
+    
 
     
 
