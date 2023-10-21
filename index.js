@@ -29,29 +29,29 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const carCollection = client.db("automobile").collection("cars");
     const cartCollection = client.db("automobile").collection("cart");
 
     app.get("/cars", async (req, res) => {
-      const cursor = carCollection.find({});
-      const cars = await cursor.toArray();
-      res.json(cars);
+      const cursor = await carCollection.find({}).toArray();
+      // const cars =  cursor;
+      res.send(cursor);
     });
 
     app.get("/cars/:id", async (req, res) => {
       const id = req.params.id;
       const query = {_id: new ObjectId(id)}
       const car = await carCollection.findOne(query);
-      res.json(car);
+      res.send(car);
     });
 
     app.get("/singleUpdate/:id", async (req, res) => {
       const id = req.params.id;
       const query = {_id: new ObjectId(id)}
       const car = await carCollection.findOne(query);
-      res.json(car);
+      res.send(car);
     });
 
     app.put("/cars/:id", async (req, res) => {
@@ -72,14 +72,14 @@ async function run() {
       };
       const result = await carCollection.updateOne(query, updateDoc, options);
       console.log(result);
-      res.json(result);
+      res.send(result);
     });
 
     app.post("/addCar", async (req, res) => {
       const newCar = req.body;
       const result = await carCollection.insertOne(newCar);
       console.log(result);
-      res.json(result);
+      res.send(result);
     });
 
     app.post("/cart", async (req, res) => {
@@ -87,7 +87,7 @@ async function run() {
       console.log(newCart);
       const result = await cartCollection.insertOne(newCart);
       console.log(result);
-      res.json(result);
+      res.send(result);
     });
 
     app.get('/cart/:email', async(req,res)=>{
@@ -108,7 +108,7 @@ async function run() {
     
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
